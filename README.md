@@ -3,7 +3,7 @@
 |目錄|專案說明|
 |-|-|
 |bh01|建立 .NET 6 Blazor Server 專案|
-|bh02|使用 EF Core 建立資料庫連結與存取|
+|bh02|使用 Entity Framework Core 存取資料庫|
 |bh03|建立部落格文章頁面之 CRUD 功能|
 |bh04|使用 Bootstrap 的標準對話窗標記宣告|
 |bh05|設計與使用 修改與刪除 Blazor 元件|

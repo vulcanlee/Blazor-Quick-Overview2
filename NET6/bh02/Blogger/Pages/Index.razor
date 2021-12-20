@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Blogger.Models
+@using Microsoft.EntityFrameworkCore
 @inject BlogDbContext BlogDbContext
 
 <PageTitle>Index</PageTitle>
@@ -9,8 +10,26 @@
     重新建立資料庫
 </button>
 <h2>@Messages</h2>
+
+<button class="btn btn-primary"
+        @onclick="DbCrudAsync">
+    資料庫 CRUD 操作
+</button>
+@foreach (var item in BlogPosts)
+{
+    <div class="row">
+        <div class="col">
+            @item.Id
+        </div>
+        <div class="col">
+            @item.Title
+        </div>
+    </div>
+}
+
 @code {
     public string Messages { get; set; }
+    public List<BlogPost> BlogPosts { get; set; } = new List<BlogPost>();
 
     async Task DbInitAsync()
     {
@@ -33,13 +52,77 @@
         for (int i = 0; i < 5; i++)
         {
             BlogPost blogPost = new BlogPost()
-            {
-                PublishDate = DateTime.Now.AddDays(-1 * i),
-                Text = $"部落格文章內容 {i}",
-                Title = $"部落格文章主題 {i}",
-            };
+                {
+                    PublishDate = DateTime.Now.AddDays(-1 * i),
+                    Text = $"部落格文章內容 {i}",
+                    Title = $"部落格文章主題 {i}",
+                };
             await BlogDbContext.BlogPost.AddAsync(blogPost);
         }
         await BlogDbContext.SaveChangesAsync();
+    }
+
+    async Task DbCrudAsync()
+    {
+        await RetriveAsync();
+
+        BlogPost AddRecord = await CreateAsync();
+
+        BlogPost updateRecord = await UpdateAsync(AddRecord);
+
+        await DeleteAsync(AddRecord);
+    }
+    async Task RetriveAsync()
+    {
+        #region Retrive 查詢資料庫紀錄
+        Messages = "取得資料庫內所有紀錄";
+        StateHasChanged();
+        BlogPosts = await BlogDbContext.BlogPost
+            .ToListAsync();
+        StateHasChanged();
+        await Task.Delay(1000);
+        #endregion
+    }
+    async Task<BlogPost> CreateAsync()
+    {
+        #region Create 新增資料庫紀錄
+        Messages = "準備新增紀錄";
+        StateHasChanged();
+        BlogPost blogPost = new()
+            {
+                Title = "新增一筆紀錄 ",
+                Text = "新增部落格文章內容",
+                PublishDate = DateTime.Now,
+            };
+        await BlogDbContext.BlogPost.AddAsync(blogPost);
+        await BlogDbContext.SaveChangesAsync();
+        await Task.Delay(3000);
+        await RetriveAsync();
+        return blogPost;
+        #endregion
+    }
+    async Task<BlogPost> UpdateAsync(BlogPost blogPost)
+    {
+        #region Update 更新資料庫紀錄
+        Messages = "準備更新紀錄";
+        StateHasChanged();
+        blogPost.Title = "該筆紀錄已經更新";
+        BlogDbContext.BlogPost.Update(blogPost);
+        await BlogDbContext.SaveChangesAsync();
+        await Task.Delay(3000);
+        await RetriveAsync();
+        return blogPost;
+        #endregion
+    }
+    async Task DeleteAsync(BlogPost blogPost)
+    {
+        #region 刪除資料庫紀錄
+        Messages = "準備刪除紀錄";
+        StateHasChanged();
+        BlogDbContext.BlogPost.Remove(blogPost);
+        await BlogDbContext.SaveChangesAsync();
+        await Task.Delay(3000);
+        await RetriveAsync();
+        #endregion
     }
 }

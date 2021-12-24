@@ -1,5 +1,5 @@
 ﻿@page "/Blog"
-
+@attribute [Authorize(Roles = "User")]
 @inject BlogViewModel ViewModel
 
 @using Blogger.Models
